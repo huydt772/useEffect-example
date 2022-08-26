@@ -1,34 +1,56 @@
-import { useState, useEffect } from "react";
-
-const tabs = ["posts", "comments", "albums", "todos"];
+import { useState, useRef } from "react";
 
 function App() {
-    const [clickedValue, setClickedValue] = useState("posts");
-    const [posts, setPosts] = useState([]);
+    const [job, setJob] = useState("");
+    const [jobs, setJobs] = useState([]);
 
-    useEffect(() => {
-        fetch(`https://jsonplaceholder.typicode.com/${clickedValue}`)
-            .then((response) => response.json())
-            .then((result) => {
-                setPosts(result);
+    const inputRef = useRef();
+
+    const handleAdd = () => {
+        setJobs([...jobs, job]);
+        setJob("");
+
+        inputRef.current.focus();
+    };
+
+    const handleSubmit = (e) => {
+        if (e.which === 13) {
+            handleAdd();
+        }
+    };
+
+    const handleDelete = (result) => {
+        setJobs((prev) => {
+            const newJobs = prev.filter((job) => {
+                return job !== result;
             });
-    }, [clickedValue]);
+
+            return newJobs;
+        });
+    };
 
     return (
         <div className="App">
-            {tabs.map((tab) => (
-                <button
-                    key={tab}
-                    style={tab === clickedValue ? { backgroundColor: "#333", color: "#fff" } : {}}
-                    onClick={() => setClickedValue(tab)}
-                >
-                    {tab}
-                </button>
-            ))}
+            <h2>List job</h2>
+
+            <input
+                ref={inputRef}
+                value={job}
+                type="text"
+                placeholder="Enter your job..."
+                onChange={(e) => setJob(e.target.value)}
+                onKeyDown={handleSubmit}
+            />
+            <button onClick={handleAdd}>Add</button>
 
             <ul>
-                {posts.map((post) => (
-                    <li key={post.id}>{post.title || post.body}</li>
+                {jobs.map((job, index) => (
+                    <li key={index}>
+                        {job}{" "}
+                        <span style={{ cursor: "pointer" }} onClick={() => handleDelete(job)}>
+                            &times;
+                        </span>
+                    </li>
                 ))}
             </ul>
         </div>
